@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Self-hosted appointment booking for IT service desks: people book their own slot at the desk, for a device replacement, a new starter or anything that takes more than a quick question. Your server, your data. Open source, runs on Windows Server with IIS.">
+<title>DeskSlot – appointment booking for IT service desks</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="DeskSlot – appointment booking for IT service desks">
+<meta property="og:description" content="People book their own slot at the IT service desk. Your server, your data: no cloud, no tracking, no subscription. Open source.">
+<meta property="og:image" content="https://deskslot.nl/screens/screen-2.png">
+<meta property="og:url" content="https://deskslot.nl/">
+<style>
+/* No web fonts and no external files: system fonts only, so a visit sends nothing to a third party. */
+:root{
+  --bg:#f2f4f6; --surface:#ffffff; --fg:#13202b; --muted:#53626f; --line:#d5dce2;
+  --accent:#0b5fd1; --accent-fg:#ffffff;
+  --ink-block:#13202b; --ink-fg:#eef2f5; --ink-line:#3a4752;
+  --f-display:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --f-body:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:"Cascadia Mono",ui-monospace,Consolas,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0e1419; --surface:#161e25; --fg:#e8eef2; --muted:#93a3b0; --line:#2a3640;
+  --accent:#5aa2ff; --accent-fg:#06121f;
+  --ink-block:#0a0f13; --ink-fg:#e8eef2; --ink-line:#3a4752; color-scheme:dark}}
+html{color-scheme:light dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:400 18px/1.55 var(--f-body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1080px;margin:0 auto}
+a{color:var(--accent)}
+img{max-width:100%}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--f-display);line-height:1.1;text-wrap:balance;margin:0}
+h1{font-size:clamp(2.3rem,5.6vw,3.9rem);font-weight:700;letter-spacing:-.02em}
+h2{font-size:clamp(1.7rem,3.6vw,2.3rem);font-weight:700;letter-spacing:-.01em}
+h3{font-size:1.15rem;font-weight:700}
+.label{font:600 .78rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px}
+.intro{max-width:58ch;color:var(--muted);margin:12px 0 0}
+nav{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;justify-content:space-between;padding-block:22px}
+.brand{font:700 1.3rem var(--f-display);text-decoration:none;color:var(--fg);display:flex;align-items:center;gap:10px}
+.brand i{display:inline-block;width:26px;height:26px;border-radius:6px;background:var(--accent);position:relative}
+.brand i::after{content:"";position:absolute;inset:6px 6px 8px 6px;border:2px solid var(--accent-fg);border-radius:2px}
+nav ul{display:flex;gap:22px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
+nav ul a{color:var(--muted);text-decoration:none;font-weight:600;font-size:.98rem}
+nav ul a:hover{color:var(--fg)}
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:48px;align-items:center;padding-block:56px 72px}
+.hero p.lead{font-size:1.2rem;color:var(--muted);max-width:38ch;margin:22px 0 28px}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.cta.spaced{margin-top:22px}
+.btn{display:inline-block;padding:13px 22px;border-radius:8px;font:700 1rem var(--f-body);text-decoration:none;border:2px solid var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-fg)}
+.btn.ghost{color:var(--accent);background:transparent}
+.btn[aria-disabled=true]{opacity:.6;cursor:not-allowed}
+.note{font-size:.92rem;color:var(--muted);margin-top:14px}
+.shot{margin:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;box-shadow:0 18px 40px -26px rgba(10,30,50,.45)}
+.shot img{display:block;width:100%;height:auto;border-radius:8px;border:1px solid var(--line)}
+.shot figcaption{font-size:.92rem;color:var(--muted);padding:10px 4px 2px}
+.gallery{margin-top:30px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.gallery .wide{grid-column:1/-1}
+section{padding-block:64px;border-top:1px solid var(--line)}
+.rows{margin-top:30px;display:grid}
+.row{display:grid;grid-template-columns:minmax(0,15rem) minmax(0,1fr);gap:8px 40px;padding-block:20px;border-top:1px solid var(--line)}
+.row:last-child{border-bottom:1px solid var(--line)}
+.row p{margin:0;color:var(--muted);max-width:60ch}
+.flow{margin-top:32px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;list-style:none;padding:0;counter-reset:s}
+.flow li{counter-increment:s;border-top:3px solid var(--accent);padding-top:14px}
+.flow li::before{content:"Step " counter(s);display:block;font:600 .75rem var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.flow p{margin:6px 0 0;color:var(--muted);font-size:.98rem}
+.ink{background:var(--ink-block);color:var(--ink-fg);border-radius:16px;padding:44px clamp(20px,4vw,48px);margin-block:8px}
+.ink h2{color:var(--ink-fg)}
+.ink p{color:color-mix(in srgb,var(--ink-fg) 78%,transparent);max-width:56ch;margin-top:14px}
+.ink .label{color:color-mix(in srgb,var(--ink-fg) 65%,transparent)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:22px;margin-top:28px}
+.facts div{border-left:3px solid var(--accent);padding-left:14px}
+.facts b{display:block;font:700 1.9rem var(--f-display);color:var(--ink-fg)}
+.facts span{font-size:.95rem;color:color-mix(in srgb,var(--ink-fg) 72%,transparent)}
+.stack{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+.stack span{font:600 .82rem var(--f-mono);border:1px solid var(--ink-line);border-radius:999px;padding:4px 12px;color:var(--ink-fg)}
+.req{margin-top:30px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.req div{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+.req ul{margin:12px 0 0;padding-left:1.2em;color:var(--muted)}
+.req li{margin-block:6px}
+footer{padding-block:40px 56px;border-top:1px solid var(--line);color:var(--muted);font-size:.95rem;display:flex;flex-wrap:wrap;gap:12px 32px;justify-content:space-between}
+@media (max-width:860px){
+  .hero{grid-template-columns:minmax(0,1fr);gap:36px;padding-block:32px 48px}
+  .row{grid-template-columns:minmax(0,1fr)}
+  .flow{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .req{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:700px){.gallery{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:480px){.flow{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+<nav aria-label="Main">
+  <a class="brand" href="#top"><i aria-hidden="true"></i>DeskSlot</a>
+  <ul>
+    <li><a href="#screens">Screens</a></li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#admins">For administrators</a></li>
+    <li><a href="#requirements">Requirements</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+    <li><a href="#download">Download</a></li>
+  </ul>
+</nav>
+
+<header class="hero" id="top">
+  <div>
+    <p class="label">For IT service desks that work by appointment</p>
+    <h1>Appointment booking for IT service desks. Your server, your data.</h1>
+    <p class="lead">People book their own slot at the desk: a device replacement, a new starter, a hand-in, or anything that takes more than a quick question. The desk never overbooks, and nothing leaves your network: no cloud, no tracking, no subscription. Open source, so you stay in control.</p>
+    <div class="cta">
+      <a class="btn primary" href="#download">Get DeskSlot</a>
+      <a class="btn ghost" href="#how">See how it works</a>
+    </div>
+    <p class="note">Self-hosted on Windows Server with IIS. Free and open source. Not a desk-sharing or room-booking tool: it books time with your service desk.</p>
+  </div>
+  <figure class="shot">
+    <img src="screens/screen-2.png" width="777" height="617" alt="The booking calendar: working days with free slots in green, other days greyed out">
+    <figcaption>Choosing a day. Days with room are green; the rest are greyed out.</figcaption>
+  </figure>
+</header>
+</div>
+
+<section id="screens"><div class="wrap">
+  <p class="label">The booking screens</p>
+  <h2>What the person booking sees</h2>
+  <p class="intro">Screenshots with test data. The screens are in Dutch today; a language file for other languages is planned.</p>
+  <div class="gallery">
+    <figure class="shot wide"><img src="screens/screen-1.png" width="791" height="604" alt="Service tiles, each with a short description"><figcaption>1. Choose a service. Tiles only show what this person may book.</figcaption></figure>
+    <figure class="shot"><img src="screens/screen-2.png" width="777" height="617" alt="Calendar with free days in green"><figcaption>2. Pick a day.</figcaption></figure>
+    <figure class="shot"><img src="screens/screen-3.png" width="708" height="428" alt="List of free time slots on one day"><figcaption>3. Pick a time. Only free slots are listed.</figcaption></figure>
+    <figure class="shot"><img src="screens/screen-4.png" width="856" height="426" alt="Summary of the choice with Book, Back and Start again buttons"><figcaption>4. Check the summary and confirm.</figcaption></figure>
+    <figure class="shot"><img src="screens/screen-5.png" width="847" height="428" alt="Confirmation that the appointment is booked, with the instructions for the visit"><figcaption>5. Booked. The invitation follows in the person's calendar.</figcaption></figure>
+  </div>
+</div></section>
+
+<section id="features"><div class="wrap">
+  <p class="label">What it does</p>
+  <h2>Everything a desk needs, from a quiet week to a busy rollout</h2>
+  <div class="rows">
+    <div class="row"><h3>Your own services</h3><p>Define what people can book: a device replacement, a new starter, handing in equipment, a longer issue at the desk. Each service has its own duration, instructions and booking period.</p></div>
+    <div class="row"><h3>Only real slots</h3><p>People see days with room in green and only the times that are actually free. Opening hours, breaks, a buffer between visits and the number of seats at the counter are all settings.</p></div>
+    <div class="row"><h3>Capacity that fits the real day</h3><p>All services share the seats at the counter. Fewer seats on a given date, weekday or half day, closed days, a minimum lead time and a booking window are all settings. Lowering capacity or closing a day with bookings shows you who is affected before you save.</p></div>
+    <div class="row"><h3>Change or cancel without calling</h3><p>People see their own appointment, and can move or cancel it up to a deadline you set per service. One active appointment per person per service.</p></div>
+    <div class="row"><h3>A ten minute hold</h3><p>A chosen slot is held while the person confirms, with a countdown on the screen, so two people never book the last seat at the same moment. Booking is checked again on the server.</p></div>
+    <div class="row"><h3>Calendar and e-mail</h3><p>Each booking becomes an appointment in the desk's Exchange calendar, with an invitation to the person. Moving or cancelling updates it. A reminder mail goes out a set number of days before, from the desk's own address. Texts are your own templates: the appointment text per service, and one text each for the reminder, the re-invitation and a cancellation by the desk.</p></div>
+    <div class="row"><h3>Booking never waits for Exchange</h3><p>A booking is saved first and sent to the calendar afterwards, with retries. If Exchange is down for a while, people can still book, and the desk sees what is still waiting.</p></div>
+    <div class="row"><h3>Who may book what</h3><p>Rules per service on organisation and department, with personal exceptions. People who may not book a service do not see it, or see why they cannot.</p></div>
+    <div class="row"><h3>At the counter</h3><p>A day overview and a printable PDF with a box to tick on arrival. The desk records who showed up, can invite a no-show to book again with one click, and can cancel an appointment or a whole day with a reason that is mailed to the person. No penalties.</p></div>
+    <div class="row"><h3>Reports</h3><p>Week overview with occupancy, progress per service, no-shows and bookings that no longer fit the rules, as PDF with your logo. The next working day&#39;s list can be mailed to the desk automatically. A searchable booking list exports to CSV and Excel.</p></div>
+    <div class="row"><h3>Announcements</h3><p>A banner at the top of the booking pages for closures and disruptions, with a start and end date and three levels of urgency.</p></div>
+    <div class="row"><h3>Managed in the browser</h3><p>Services, rules, texts, dates, mail and sign-in settings live in the admin portal and apply at once. No config files for daily work. Three roles: user, desk staff and administrator.</p></div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <p class="label">The booking flow</p>
+  <h2>Four steps for the person booking</h2>
+  <ol class="flow">
+    <li><h3>Choose a service</h3><p>Tiles for the services this person may book.</p></li>
+    <li><h3>Pick a day</h3><p>Calendar with free days in green, opened on the first day with room.</p></li>
+    <li><h3>Pick a time</h3><p>Only free slots, grouped by morning and afternoon. The chosen one is held for ten minutes.</p></li>
+    <li><h3>Confirm</h3><p>A summary in plain words, then an invitation in the person's calendar.</p></li>
+  </ol>
+</div></section>
+
+<section id="admins"><div class="wrap">
+  <div class="ink">
+    <p class="label">For administrators</p>
+    <h2>Built to be run by one person, on your own server</h2>
+    <p>One web app, one database file. It runs with no internet access, uses your existing sign-in, and installs with a script that checks itself.</p>
+    <div class="facts">
+      <div><b>1 process</b><span>ASP.NET Core on IIS with SQLite. No database server to run.</span></div>
+      <div><b>SSO</b><span>OpenID Connect, tested with AD FS. Local accounts only for emergency access.</span></div>
+      <div><b>Offline</b><span>No CDN, no web fonts, no telemetry. Everything ships in the package.</span></div>
+      <div><b>2,000+</b><span>Automated tests, including load tests and every endpoint's access rule.</span></div>
+    </div>
+    <div class="stack">
+      <span>.NET 10</span><span>IIS</span><span>SQLite</span><span>OpenID Connect</span><span>Exchange Server (EWS)</span>
+    </div>
+  </div>
+  <div class="rows">
+    <div class="row"><h3>Install and update with a script</h3><p>The deploy script sets up the site, the app pool, file permissions and https, can run as a dry run, and ends with a self check. Updates keep a copy of the previous version and the database.</p></div>
+    <div class="row"><h3>Backups and cleanup</h3><p>A daily database backup with an integrity check and automatic pruning, and a nightly job that deletes or anonymises data past its retention period.</p></div>
+    <div class="row"><h3>Health and logging</h3><p>A health endpoint for monitoring and fixed event numbers in the Windows event log, with no personal data in the messages.</p></div>
+    <div class="row"><h3>An audit log you can search</h3><p>Every admin and desk action is logged. Filter by period, kind of action and who did it, search the text, and export to CSV or Excel.</p></div>
+    <div class="row"><h3>Security built in</h3><p>Strict security headers, CSRF protection, rate limits per person and an IP restriction for administration. Error messages use fixed texts; raw system errors only go to the server log.</p></div>
+  </div>
+</div></section>
+
+<section id="requirements"><div class="wrap">
+  <p class="label">Requirements</p>
+  <h2>What you need, and what it does not do yet</h2>
+  <div class="req">
+    <div>
+      <h3>You need</h3>
+      <ul>
+        <li>Windows Server with IIS and the .NET 10 Hosting Bundle</li>
+        <li>An OpenID Connect sign-in, such as AD FS</li>
+        <li>For calendar and mail: Exchange Server on-premises, with a shared mailbox for the desk and a service account</li>
+        <li>A TLS certificate for the host name</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Not yet</h3>
+      <ul>
+        <li>Exchange Online (Microsoft Graph) is not supported yet</li>
+        <li>Microsoft Entra ID should work through OpenID Connect, but has not been tested</li>
+        <li>The screens are in Dutch only</li>
+        <li>One set of seats for all services; separate counters per service are planned</li>
+        <li>One server; no load-balanced setup</li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="privacy"><div class="wrap">
+  <p class="label">Privacy</p>
+  <h2>Little data, kept for a limited time</h2>
+  <div class="rows">
+    <div class="row"><h3>Only what is needed</h3><p>Name, e-mail address, organisation, department and a username, taken from your sign-in. No phone numbers.</p></div>
+    <div class="row"><h3>Retention you set</h3><p>Appointments are anonymised after a period you choose, 12 months by default. The audit log has its own period.</p></div>
+    <div class="row"><h3>A data overview for your privacy officer</h3><p>A page generated from the code lists every table and column, why it exists, who sees it and how long it is kept. It cannot drift from the real database because a test compares them.</p></div>
+  </div>
+</div></section>
+
+<section id="download"><div class="wrap">
+  <p class="label">Download</p>
+  <h2>Get DeskSlot</h2>
+  <p class="intro">Each release is a zip with a checksum file, published on GitHub. Check the checksum on the server before you install.</p>
+  <div class="cta spaced">
+    <a class="btn primary" href="#download" aria-disabled="true">Latest release on GitHub (soon)</a>
+    <a class="btn ghost" href="#download" aria-disabled="true">Documentation (soon)</a>
+  </div>
+  <p class="note">The release links appear when the project is made public. Licence to be announced.</p>
+</div></section>
+
+<div class="wrap">
+<footer>
+  <span>DeskSlot</span>
+  <span>Provided as is, without support.</span>
+</footer>
+</div>
+
+</body>
+</html>
