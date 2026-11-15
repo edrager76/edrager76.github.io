@@ -1,0 +1,21 @@
+/* Design tokens of the DeskSlot site: the ONLY place for colours (SiteTests checks this). The blue is the blue of the
+   app (src/Serviceplein.Web/wwwroot/css/tokens.css). Dark values follow the setting of the visitor's system; the
+   pictures and videos stay light. */
+:root {
+  --bg: #f4f7fb; --surface: #ffffff; --fg: #1b2430; --muted: #556070; --line: #cfd9e6;
+  --accent: #0b4a8f; --accent-fg: #ffffff; --tint: #e6eef9;
+  --ink-block: #0b2f5b; --ink-fg: #eef3fa; --ink-muted: #c3d3e8; --ink-line: #3d5c84;
+  --shadow: rgba(11, 47, 91, .28);
+  --frame: #1b2430;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1722; --surface: #172234; --fg: #e6edf6; --muted: #a3b0c2; --line: #2a374b;
+    --accent: #7db4f5; --accent-fg: #0f1722; --tint: #1d2e47;
+    --ink-block: #0b1320; --ink-fg: #e6edf6; --ink-muted: #a3b0c2; --ink-line: #2a374b;
+    --shadow: rgba(0, 0, 0, .55);
+    --frame: #000000;
+    color-scheme: dark;
+  }
+}
