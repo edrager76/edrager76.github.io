@@ -1,26 +1,26 @@
 WEBVTT
 
 1
-00:00:00.855 --> 00:00:05.846
+00:00:00.828 --> 00:00:05.778
 The day list shows today's appointments, per service.
 
 2
-00:00:05.846 --> 00:00:09.796
+00:00:05.778 --> 00:00:09.671
 Someone arrived: mark them as attended.
 
 3
-00:00:09.796 --> 00:00:13.361
+00:00:09.671 --> 00:00:13.485
 Someone did not come: mark them as not attended.
 
 4
-00:00:13.361 --> 00:00:17.846
+00:00:13.485 --> 00:00:18.496
 The desk can send a fresh invitation to book again.
 
 5
-00:00:17.846 --> 00:00:28.126
+00:00:18.496 --> 00:00:28.864
 An appointment can be cancelled with a reason; the user gets an e-mail.
 
 6
-00:00:28.126 --> 00:00:33.040
+00:00:28.864 --> 00:00:33.800
 Cancelled appointments stay listed below the day, with the reason.
 
